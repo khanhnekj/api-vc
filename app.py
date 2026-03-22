@@ -2,12 +2,13 @@ from flask import Flask, request, send_file
 from gtts import gTTS
 import io
 import urllib.parse
+import os
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Google TTS API OK"
+    return "TTS API OK"
 
 @app.route("/tts")
 def tts():
@@ -17,7 +18,7 @@ def tts():
         return {"error": "Missing text"}, 400
 
     try:
-        # fix lỗi encode
+        # fix lỗi tiếng Việt
         text = urllib.parse.unquote(text)
 
         mp3_fp = io.BytesIO()
@@ -25,7 +26,6 @@ def tts():
         tts.write_to_fp(mp3_fp)
         mp3_fp.seek(0)
 
-        # check file rỗng
         if mp3_fp.getbuffer().nbytes == 0:
             return {"error": "Empty audio"}, 500
 
@@ -33,3 +33,8 @@ def tts():
 
     except Exception as e:
         return {"error": str(e)}, 500
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
